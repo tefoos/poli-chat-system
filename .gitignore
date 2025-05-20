@@ -27,6 +27,3 @@ deps/
 .DS_Store
 Thumbs.db
 
-# Project binaries
-server
-client
