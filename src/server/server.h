@@ -3,7 +3,7 @@
 
 #include <netinet/in.h>
 
-#define PORT 8888
+#define PORT 5555
 #define MAX_CLIENTS 10
 #define BUFFER_SIZE 1024
 

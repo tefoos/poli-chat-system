@@ -59,20 +59,81 @@ int start_server(void) {
       continue;
     }
 
-    printf("New connection from %s:%d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-
     client_t *client = (client_t *)malloc(sizeof(client_t));
     client->socket = client_socket;
     client->address = client_addr;
     client->id = client_socket;
-    strcpy(client->username, "PoliAnonimoTemp");
+    strncpy(client->username, "PoliAnonimoTemp", sizeof(client->username) - 1);
+    client->username[sizeof(client->username) - 1] = '\0';
 
     add_client(client);
 
-    pthread_create(&tid, NULL, &handle_client, (void*)client);
 
+
+
+    int thread_result =  pthread_create(&tid, NULL, &handle_client, (void*)client);
+    if(thread_result != 0) {
+      printf("ERROR: Failed to creat thread:%s\n", strerror(thread_result));
+      remove_client(client->id);
+      free(client);
+      close(client_socket);
+      continue;
+    }
     pthread_detach(tid);
   }
   close(server_socket);
   return 0;
 } 
+
+void *handle_client(void *arg) {
+  client_t *client = (client_t*)arg;
+  char buffer[BUFFER_SIZE];
+  int bytes_received;
+
+  sprintf(buffer, "Hi %s!! Welcome to the Poli Chat!!\n", client->username);
+  send(client->socket, buffer, strlen(buffer), 0);
+
+  while ((bytes_received = recv(client->socket,buffer, BUFFER_SIZE, 0)) > 0) {
+    buffer[bytes_received] = '\0';
+
+    printf("Message from client %s: %s", client->username, buffer);
+
+    //TODO: Implement the chat room and other process
+    send(client->socket, buffer, strlen(buffer), 0);
+  }
+
+  printf("Client %s disconnected\n", client->username);
+
+  close(client->socket);
+  remove_client(client->id);
+  free(client);
+
+  return NULL;
+}
+
+void add_client(client_t *client) {
+  pthread_mutex_lock(&clients_mutex);
+
+  for (int i = 0; i < MAX_CLIENTS; i++) {
+    if (clients[i] == NULL) {
+      clients[i] = client;
+      break;
+    }
+
+  }
+
+  pthread_mutex_unlock(&clients_mutex);
+}
+
+void remove_client(int id) {
+  pthread_mutex_lock(&clients_mutex);
+
+  for (int i = 0; i < MAX_CLIENTS; i++) {
+    if (clients[i] && clients[i]->id == id) {
+      clients[i] = NULL;
+      break;
+    }
+  }
+
+  pthread_mutex_unlock(&clients_mutex);
+}
