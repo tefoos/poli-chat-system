@@ -1,0 +1,32 @@
+# Build artifacts
+*.o
+*.a
+*.so
+*.exe
+*.out
+
+# Build directories
+build/
+bin/
+obj/
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*~
+
+# Dependencies
+deps/
+
+# Generated files
+*.log
+*.pid
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Project binaries
+server
+client
