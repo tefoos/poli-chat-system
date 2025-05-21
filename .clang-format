@@ -5,4 +5,4 @@ BreakBeforeBraces: Attach
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
-ColumnLimit: 100  # Adjust as needed
+ColumnLimit: 100
