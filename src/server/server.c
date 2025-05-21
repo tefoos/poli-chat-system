@@ -112,7 +112,7 @@ void *handle_client(void *arg) {
         username_set = 1;
 
         snprintf(temp_buffer, BUFFER_SIZE, "Hi %s!! Welcome to the Poli Chat!!\n", client->username);
-        send(client->socket, buffer, strlen(buffer), 0);
+        send(client->socket, temp_buffer, strlen(temp_buffer), 0);
 
         printf("User \"%s\" connected (ID: %d)\n", client->username, client->id);
 
@@ -125,11 +125,12 @@ void *handle_client(void *arg) {
 
     printf("Message from client %d (%s): %s", client->id, client->username, buffer);
 
-    //TODO: Process command and send message to other clients
+    snprintf(temp_buffer, BUFFER_SIZE, "%s: %.*s",
+             client->username,
+             BUFFER_SIZE - (int)strlen(client->username) - 3,
+             buffer);
 
-    char temp_buffer[BUFFER_SIZE];
-    snprintf(temp_buffer, BUFFER_SIZE, "[Server]: %.*s", BUFFER_SIZE - 11 ,buffer);
-    send(client->socket, temp_buffer, strlen(temp_buffer), 0);
+    broadcast_message(temp_buffer, client->id, 0);
   }
 
   printf("User \"%s\" (ID: %d) disconnected\n", client->username, client->id);
@@ -139,7 +140,6 @@ void *handle_client(void *arg) {
   close(client->socket);
   remove_client(client->id);
   free(client);
-
   return NULL;
 }
 
