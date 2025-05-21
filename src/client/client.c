@@ -31,8 +31,18 @@ void *receive_handler(void *arg) {
                 continue;            
             }
             printf("\033[2K\r");
-            printf("%s", buffer);
 
+            char proper_username[USERNAME_MAX + 2];
+            snprintf(proper_username, sizeof(proper_username), "%s: ", username);
+
+            if (strncmp(buffer, proper_username, strlen(proper_username)) == 0) {
+                char modified_buffer[BUFFER_SIZE];
+                snprintf(modified_buffer,BUFFER_SIZE , "%s(you):%s", username, buffer + strlen(proper_username));
+                printf("%s", modified_buffer);
+            }else {
+                printf("%s", buffer);
+            }
+            
             if (buffer[strlen(buffer) - 1] != '\n') {
                 printf("\n");
             }

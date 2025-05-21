@@ -65,9 +65,8 @@ int start_server(void) {
     client->socket = client_socket;
     client->address = client_addr;
     client->id = client_socket;
-    strncpy(client->username, "PoliAnonimoTemp", sizeof(client->username) - 1);
-    client->username[sizeof(client->username) - 1] = '\0';
-
+    client->username[0] = '\0';
+    
     add_client(client);
 
 
