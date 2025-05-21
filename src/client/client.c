@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -19,17 +20,30 @@ void *receive_handler(void *arg) {
     (void) arg;
     char buffer[BUFFER_SIZE];
     int receive_len;
+    static int welcome_received = 0;
 
     while (running) {
         memset(buffer, 0, BUFFER_SIZE);
         receive_len = recv(client_socket, buffer, BUFFER_SIZE, 0);
 
         if (receive_len > 0) {
+            if (strncmp(buffer, MSG_TYPE_USERNAME, strlen(MSG_TYPE_USERNAME)) == 0 ) {
+                continue;            
+            }
+            printf("\033[2K\r");
             printf("%s", buffer);
 
             if (buffer[strlen(buffer) - 1] != '\n') {
                 printf("\n");
             }
+
+            if (!welcome_received && strstr(buffer, "Welcome to the Poli Chat") != NULL) {
+                welcome_received = 1;
+                printf("You can now start chatting. Type 'quit' or 'chao' to exit.\n");
+            }
+            
+            printf("> ");
+            fflush(stdout);
         } else if ( receive_len == 0) {
             printf("Server disconnected\n");
             running = 0;
@@ -93,6 +107,7 @@ void client_cleanup(void) {
     close(client_socket);
 }
 
+
 int main() {
     pthread_t receive_thread;
     char buffer[BUFFER_SIZE];
@@ -127,7 +142,11 @@ int main() {
 
     pthread_detach(receive_thread);
 
-    printf("You can now start chatting. Type 'chao' or 'bye' to exit.\n");
+    sleep(1);
+    
+    printf("> ");
+    fflush(stdout);
+    
     while (running) {
         memset(buffer, 0, BUFFER_SIZE);
 
@@ -140,9 +159,11 @@ int main() {
             break;
         }
 
+        printf("\033[1A");
+        printf("\033[2K");
+
         send(client_socket, buffer, strlen(buffer), 0);
     }
-
     client_cleanup();
 
     return 0;
