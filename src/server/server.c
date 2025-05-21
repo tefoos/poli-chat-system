@@ -1,14 +1,15 @@
 #include "server.h"
+
+#include <arpa/inet.h>
 #include <bits/pthreadtypes.h>
 #include <bits/types/struct_iovec.h>
-#include <unistd.h>
 #include <netinet/in.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <arpa/inet.h>
+#include <unistd.h>
 
 client_t *clients[MAX_CLIENTS];
 pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -66,14 +67,11 @@ int start_server(void) {
     client->address = client_addr;
     client->id = client_socket;
     client->username[0] = '\0';
-    
+
     add_client(client);
 
-
-
-
-    int thread_result =  pthread_create(&tid, NULL, &handle_client, (void*)client);
-    if(thread_result != 0) {
+    int thread_result = pthread_create(&tid, NULL, &handle_client, (void *)client);
+    if (thread_result != 0) {
       printf("ERROR: Failed to creat thread:%s\n", strerror(thread_result));
       remove_client(client->id);
       free(client);
@@ -84,16 +82,16 @@ int start_server(void) {
   }
   close(server_socket);
   return 0;
-} 
+}
 
 void *handle_client(void *arg) {
-  client_t *client = (client_t*)arg;
+  client_t *client = (client_t *)arg;
   char buffer[BUFFER_SIZE];
   char temp_buffer[BUFFER_SIZE];
   int bytes_received;
   int username_set = 0;
 
-  while ((bytes_received = recv(client->socket,buffer, BUFFER_SIZE, 0)) > 0) {
+  while ((bytes_received = recv(client->socket, buffer, BUFFER_SIZE, 0)) > 0) {
     buffer[bytes_received] = '\0';
 
     if (strncmp(buffer, MSG_TYPE_USERNAME, strlen(MSG_TYPE_USERNAME)) == 0 && !username_set) {
@@ -106,11 +104,12 @@ void *handle_client(void *arg) {
       }
 
       if (len > 0) {
-        strncpy(client->username, new_username, sizeof(client->username)- 1);
+        strncpy(client->username, new_username, sizeof(client->username) - 1);
         client->username[sizeof(client->username) - 1] = '\0';
         username_set = 1;
 
-        snprintf(temp_buffer, BUFFER_SIZE, "Hi %s!! Welcome to the Poli Chat!!\n", client->username);
+        snprintf(temp_buffer, BUFFER_SIZE, "Hi %s!! Welcome to the Poli Chat!!\n",
+                 client->username);
         send(client->socket, temp_buffer, strlen(temp_buffer), 0);
 
         printf("User \"%s\" connected (ID: %d)\n", client->username, client->id);
@@ -124,10 +123,8 @@ void *handle_client(void *arg) {
 
     printf("Message from client %d (%s): %s", client->id, client->username, buffer);
 
-    snprintf(temp_buffer, BUFFER_SIZE, "%s: %.*s",
-             client->username,
-             BUFFER_SIZE - (int)strlen(client->username) - 3,
-             buffer);
+    snprintf(temp_buffer, BUFFER_SIZE, "%s: %.*s", client->username,
+             BUFFER_SIZE - (int)strlen(client->username) - 3, buffer);
 
     broadcast_message(temp_buffer, client->id, 0);
   }
@@ -150,7 +147,6 @@ void add_client(client_t *client) {
       clients[i] = client;
       break;
     }
-
   }
 
   pthread_mutex_unlock(&clients_mutex);
@@ -168,7 +164,6 @@ void remove_client(int id) {
 
   pthread_mutex_unlock(&clients_mutex);
 }
-
 
 void broadcast_message(const char *message, int sender_id, int exclude_sender) {
   pthread_mutex_lock(&clients_mutex);

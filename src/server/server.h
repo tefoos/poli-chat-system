@@ -3,7 +3,6 @@
 
 #include "../common/chat_common.h"
 
-
 void *handle_client(void *arg);
 void add_client(client_t *client);
 void remove_client(int id);
