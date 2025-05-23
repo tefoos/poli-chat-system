@@ -16,7 +16,5 @@ typedef struct {
 } client_t;
 
 #define MSG_TYPE_USERNAME "USERNAME:"
-#define MSG_TYPE_PRIVATE "PRIVATE:"
-#define MSG_TYPE_GROUP "GROUP:"
 
 #endif /* CHAT_COMMON_H */

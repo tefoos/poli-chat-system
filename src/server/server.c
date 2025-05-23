@@ -115,7 +115,7 @@ void *handle_client(void *arg) {
         printf("User \"%s\" connected (ID: %d)\n", client->username, client->id);
 
         snprintf(temp_buffer, BUFFER_SIZE, "User \"%s\" has joined the chat\n", client->username);
-        broadcast_message(buffer, client->id, 0);
+        broadcast_message(temp_buffer, client->id, 0);
 
         continue;
       }
